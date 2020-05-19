@@ -3,9 +3,11 @@ package com.example.accidentdetection;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActivityManager;
 import android.content.Context;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,6 +18,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -25,12 +29,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button btstart,btstop;
     TextView x,y,z,totaltv;
     Button accibutton;
-
+    FirebaseAuth mAuth;
+    FirebaseUser user;
+    SharedPreferences sharedpreferences;
+    SharedPreferences.Editor editor;
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
-    public DatabaseReference myRef = database.getReference("message");
+    public DatabaseReference myRef ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        myRef= database.getReference("Users/"+user.getUid()+"/Accident");
         setContentView(R.layout.activity_main);
         x=(TextView)findViewById(R.id.textView2);
         y=(TextView)findViewById(R.id.textView);
@@ -42,37 +52,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener((SensorEventListener) this, sensor,SensorManager.SENSOR_DELAY_FASTEST );
-
+        //startService(new Intent(this, MyService.class));
         accibutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myRef.setValue("Accident");
+                myRef.setValue("1");
 
                 //Toast.makeText(this, "Accident", Toast.LENGTH_LONG).show();
             }
         });
-
-
+        startkaro();
+        if(!isMyServiceRunning(MyService.class))
+        btstart.setVisibility(View.INVISIBLE);
+        else
+        btstart.setVisibility(View.INVISIBLE);
         btstart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startkaro();
+                //myRef.setValue("1");
+                btstart.setVisibility(View.INVISIBLE);
+                btstop.setVisibility(View.VISIBLE);
+
             }
         });
 
-       startkaro();
+
 
         btstop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stopkaro();
+               // myRef.setValue("0");
+                btstart.setVisibility(View.VISIBLE);
+                btstop.setVisibility(View.INVISIBLE);
             }
         });
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-
-        myRef.setValue("Hello, World!");
     }
+
     public void startkaro()
     {
         startService(new Intent(this, MyService.class));
@@ -112,6 +129,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onPause();
         sensorManager.unregisterListener(this);
 
+    }
+
+    public boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, MyService.class));
     }
 }
 
