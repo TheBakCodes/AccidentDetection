@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View v) {
                 myRef.setValue("1");
+                Intent intent=new Intent(MainActivity.this,Alertothers.class);
+                startActivity(intent);
 
                 //Toast.makeText(this, "Accident", Toast.LENGTH_LONG).show();
             }

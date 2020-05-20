@@ -49,7 +49,7 @@ public class MyService2 extends Service {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                String value = dataSnapshot.getValue(String.class);
+                String value = dataSnapshot.getValue().toString();
                 editor.putString("DUID", value);
                 editor.commit();
                 Toast.makeText(MyService2.this, value, Toast.LENGTH_SHORT).show();

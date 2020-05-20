@@ -20,10 +20,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Alertothers"></activity>
+
         <service
             android:name=".MyService2"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity android:name=".alertactivity" />
         <activity android:name=".FIllDetails" />
@@ -40,9 +42,7 @@
             android:enabled="true"
             android:exported="true" />
 
-     
-
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>
