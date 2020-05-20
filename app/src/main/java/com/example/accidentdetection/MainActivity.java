@@ -89,10 +89,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void startkaro()
     {
         startService(new Intent(this, MyService.class));
+        startService(new Intent(this, MyService2.class));
     }
     public void stopkaro()
     {
         stopService(new Intent(this, MyService.class));
+        stopService(new Intent(this, MyService2.class));
+
     }
 
     @Override

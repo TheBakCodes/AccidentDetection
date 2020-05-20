@@ -14,22 +14,29 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import static android.content.ContentValues.TAG;
 
 public class MyService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor sensor;
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
-    public DatabaseReference myRef,myRef1;
+    public DatabaseReference myRef,myRef1,myRefDUID;
     FirebaseAuth mAuth;
     FirebaseUser user;
     SharedPreferences sharedpreferences;
@@ -54,18 +61,6 @@ public class MyService extends Service implements SensorEventListener {
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
-        //
-        /*Toast.makeText(this, "Start", Toast.LENGTH_LONG).show();
-        System.out.println("Service aya");
-        try {
-            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener((SensorEventListener) this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Service Error:"+e);
-        }*/
         throw new UnsupportedOperationException("Not yet implemented");
         //return null;
     }
@@ -75,20 +70,33 @@ public class MyService extends Service implements SensorEventListener {
         super.onCreate();
         Toast.makeText(this, "Start", Toast.LENGTH_LONG).show();
 
-      //  if(flag) {
-      //      timer.cancel();
-      //      Toast.makeText(this, "timer cancel hela", Toast.LENGTH_SHORT).show();
-      //      flag =false;
-       // }
-
         System.out.println("Service aya");
         //startServiceWithNotification();
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         myRef= database.getReference("Users/"+user.getUid()+"/Accident");
         myRef1= database.getReference("Users/"+user.getUid()+"/PreAcc");
+        myRefDUID=database.getReference("Users/"+user.getUid()+"/DUID");
         sharedpreferences = getSharedPreferences("Accident", Context.MODE_PRIVATE);
         editor= sharedpreferences.edit();
+        // Read from the database
+       /* myRefDUID.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                String value = dataSnapshot.getValue(String.class);
+                editor.putString("DUID", value);
+                //Log.d(TAG, "Value is: " + value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "Failed to read value.", databaseError.toException());
+            }
+
+
+        });*/
         try {
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -98,6 +106,10 @@ public class MyService extends Service implements SensorEventListener {
         {
             System.out.println("Service Error:"+e);
         }
+
+
+
+
     }
 
     @Override
@@ -120,7 +132,7 @@ public class MyService extends Service implements SensorEventListener {
         {
             double total=Math.sqrt(Math.pow(event.values[0],2)+Math.pow(event.values[1],2)+Math.pow(event.values[2],2));
 
-            if(total>=40.00)
+            if(total>=60.00)
             {
 
                 myRef.setValue("1");
@@ -142,44 +154,5 @@ public class MyService extends Service implements SensorEventListener {
 
     }
 
-   /* void startServiceWithNotification() {
-        if (isServiceRunning) return;
-        isServiceRunning = true;
 
-        Intent notificationIntent = new Intent(getApplicationContext(), MyActivity.class);
-        notificationIntent.setAction(C.ACTION_MAIN);  // A string containing the action name
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.cosmitoicon);
-
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle(getResources().getString(R.string.app_name))
-                .setTicker(getResources().getString(R.string.app_name))
-                .setContentText("App is Running")
-                .setSmallIcon(R.drawable.cosmitoicon)
-                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
-                .setContentIntent(contentPendingIntent)
-                .setOngoing(true)
-//                .setDeleteIntent(contentPendingIntent)  // if needed
-                .build();
-        notification.flags = notification.flags | Notification.FLAG_NO_CLEAR;     // NO_CLEAR makes the notification stay when the user performs a "delete all" command
-        startForeground(NOTIFICATION_ID, notification);
-    }
-
-    void stopMyService() {
-        stopForeground(true);
-        stopSelf();
-        isServiceRunning = false;
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && intent.getAction().equals(com.example.accidentdetection.Restartter.ACTION_START_SERVICE)) {
-            startServiceWithNotification();
-        }
-        else stopMyService();
-        return START_STICKY;
-    }*/
 }

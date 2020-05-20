@@ -3,7 +3,9 @@ package com.example.accidentdetection;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -31,14 +33,16 @@ public class alertactivity extends AppCompatActivity {
     FirebaseUser user;
     String TAG="AlertActivity";
     String Duid="";
-
+    SharedPreferences sharedpreferences;
     MediaPlayer mediaPlayer;
     //int maxVolume = 50;
     ProgressDialog dialog;
+    int i=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alertactivity);
+        sharedpreferences = getSharedPreferences("Accident", Context.MODE_PRIVATE);
         dialog = new ProgressDialog(this); // this = YourActivity
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         dialog.setTitle("Loading");
@@ -59,25 +63,8 @@ public class alertactivity extends AppCompatActivity {
         myRefaccident=database.getReference("Users/"+user.getUid()+"/Accident");
         myRefdname=database.getReference("Users/"+user.getUid()+"/DName");
         cancelbut.setVisibility(View.VISIBLE);
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String value = dataSnapshot.getValue().toString();
-                Duid=value;
-                Toast.makeText(alertactivity.this, value, Toast.LENGTH_SHORT).show();
-                myRefambu=database.getReference("Ambulances/"+Duid);
-                Log.d(TAG, "Value is: " + value);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-
+        Duid=sharedpreferences.getString("DUID", "0");
+        cancelbut.setVisibility(View.INVISIBLE);
 
 
 
@@ -86,27 +73,16 @@ public class alertactivity extends AppCompatActivity {
 
             public void onTick(long millisUntilFinished) {
                 countdowntv.setText( String.valueOf(millisUntilFinished / 1000));
-                if( millisUntilFinished / 1000==20)
+                Duid=sharedpreferences.getString("DUID", "0");
+                if(Duid.length()>=10&&i==0)
                 {
-                    myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            // This method is called once with the initial value and again
-                            // whenever data at this location is updated.
-                            String value = dataSnapshot.getValue().toString();
-                            Duid=value;
-                            Toast.makeText(alertactivity.this, value, Toast.LENGTH_SHORT).show();
-
-                            Log.d(TAG, "Value is: " + value);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError error) {
-                            // Failed to read value
-                            Log.w(TAG, "Failed to read value.", error.toException());
-                        }
-                    });
+                    cancelbut.setVisibility(View.VISIBLE);
+                    i=1;
                 }
+               /* if( millisUntilFinished / 1000==20)
+                {
+
+                }*/
             }
 
             public void onFinish() {
@@ -147,7 +123,7 @@ public class alertactivity extends AppCompatActivity {
                 name=database.getReference("Ambulances/"+Duid+"/PName");
                 relmob1=database.getReference("Ambulances/"+Duid+"/PRelMob1");
                 puid=database.getReference("Ambulances/"+Duid+"/PUID");
-                if(Duid.length()==28) {
+               // if(Duid.length()==28) {
                     myRefAge.setValue("N/A");
                     name.setValue("N/A");
                     lat.setValue("N/A");
@@ -155,7 +131,7 @@ public class alertactivity extends AppCompatActivity {
                     myRefBloodgr.setValue("N/A");
                     relmob1.setValue("N/A");
                     puid.setValue("N/A");
-                }
+               // }
                 myRefdname.setValue("N/A");
                 myRefduid.setValue("N/A");
                 myRefaccident.setValue("N/A");
@@ -174,5 +150,7 @@ public class alertactivity extends AppCompatActivity {
         super.onDestroy();
         mediaPlayer.stop();
         mediaPlayer.release();
+        myRefaccident.setValue("N/A");
+
     }
 }

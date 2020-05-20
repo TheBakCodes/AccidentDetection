@@ -20,7 +20,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".alertactivity"></activity>
+        <service
+            android:name=".MyService2"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <activity android:name=".alertactivity" />
         <activity android:name=".FIllDetails" />
         <activity android:name=".Main2Activity">
             <intent-filter>
@@ -35,17 +40,9 @@
             android:enabled="true"
             android:exported="true" />
 
-        <receiver
-            android:name=".Restartter"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="restartservice" />
-            </intent-filter>
-        </receiver>
+     
 
-        <activity android:name=".MainActivity">
-          </activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>
